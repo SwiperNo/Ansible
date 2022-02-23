@@ -1,0 +1,15 @@
+#Here are a few key to save when running Ansible Playbooks
+
+#verbosity
+-v	The task results are displayed.
+-vv	Both task results and task configuration are displayed
+-vvv	Includes information about connections to managed hosts
+-vvvv	Adds extra verbosity options to the connection plug-ins, including users being used in the managed hosts to execute scripts, and what scripts have been executed
+
+#Syntax Verification
+--syntax-check 
+
+#Executing a DRY run
+-C 
+
+
