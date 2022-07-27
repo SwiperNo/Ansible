@@ -9,13 +9,11 @@
       state: present
       line: 'KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha256,diffie-hellman-group15-sha512,diffie-hellman-group16-sha512,diffie-hellman-group17-sha512,diffie-hellman-group18-sha512,rsa2048-sha256,ecdh-sha2-nistp384'
 
-
   - name: Set SSH Ciphers 140-2 Compliant
     lineinfile:
       path: /etc/ssh/sshd_config
       state: present
       line: 'Ciphers aes128-ctr,aes192-ctr,aes256-ctr,aes128-gcm@openssh.com,aes256-gcm@openssh.com'
-
 
   - name: Set SSH MACs 140-2 Compliant
     lineinfile:
