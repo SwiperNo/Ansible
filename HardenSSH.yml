@@ -31,7 +31,7 @@
       line: 'PermitRootLogin no'  
 
 #Restart SSHD service if changes are made.
-- handlers:
+  handlers:
    - name: restart sshd
      service:
        name: sshd
