@@ -21,16 +21,18 @@
       path: /etc/ssh/sshd_config
       state: present
       line: 'MACs hmac-sha256,hmac-sha256@ssh.com,hmac-sha2-256,hmac-sha2-256-etm@openssh.com,hmac-sha512,hmac-sha512@ssh.com,hmac-sha2-512,hmac-sha2-512-etm@openssh.com'
-
+    notify: 
+     - restart sshd
 
   - name: Disable SSH root login
     lineinfile:
       path: /etc/ssh/sshd_config
       regexp: '^#PermitRootLogin'
-      line: 'PermitRootLogin no'
+      line: 'PermitRootLogin no'  
 
-
-  - name: Restart SSHd
-    service:
-      name: sshd
-      state: restarted
+#Restart SSHD service if changes are made.
+- handlers:
+   - name: restart sshd
+     service:
+       name: sshd
+       state: restarted
