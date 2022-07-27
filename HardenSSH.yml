@@ -2,6 +2,7 @@
 - name: Harden SSH configuration
   hosts: "{{ target }}"
   tasks:
+  
   - name : Set SSH KexAlgorithms 140-2 Compliant
     lineinfile:
       path: /etc/ssh/sshd_config
