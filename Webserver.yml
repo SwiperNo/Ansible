@@ -14,6 +14,7 @@
     secrets_src: files/htpasswd
     secrets_dest: "{{ secrets_dir }}/htpasswd"
     web_root: /var/www/html
+    
   tasks:
     - name: latest version of necessary packages installed
       yum:
