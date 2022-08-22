@@ -1,6 +1,13 @@
 ---
 - name: Harden SSH configuration
   hosts: "{{ target }}"
+  #Restart SSHD service if changes are made.
+  handlers:
+   - name: restart sshd
+     service:
+       name: sshd
+       state: restarted
+             
   tasks:
   
   - name : Set SSH KexAlgorithms 140-2 Compliant
@@ -20,18 +27,12 @@
       path: /etc/ssh/sshd_config
       state: present
       line: 'MACs hmac-sha256,hmac-sha256@ssh.com,hmac-sha2-256,hmac-sha2-256-etm@openssh.com,hmac-sha512,hmac-sha512@ssh.com,hmac-sha2-512,hmac-sha2-512-etm@openssh.com'
-    notify: 
-     - restart sshd
-
+  
   - name: Disable SSH root login
     lineinfile:
       path: /etc/ssh/sshd_config
-      regexp: '^#PermitRootLogin'
-      line: 'PermitRootLogin no'  
+      regexp: '^PermitRootLogin'
+      line: 'PermitRootLogin no'
+     notify: 
+     - restart sshd
 
-#Restart SSHD service if changes are made.
-  handlers:
-   - name: restart sshd
-     service:
-       name: sshd
-       state: restarted
