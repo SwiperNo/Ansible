@@ -1,0 +1,53 @@
+---
+- name: Patch management simplified 
+  hosts: patchgroup1
+  vars_files:
+    - email.yml
+
+  pre_tasks:
+
+    - name: Check for yum-utils before proceeding
+      command: rpm -qa | grep yum-utils
+      register: package_check
+
+    - name: Install yum-utils if not found
+      package:
+        name: yum-utils
+        state: latest
+      when: ( 'yum-utils' not in package_check )
+
+  tasks:
+
+    - name: Update all packages
+      yum:
+        name: kernel
+        state: latest
+        update_cache: yes
+        
+    - name: Check if reboot is needed
+      command: needs-restarting -r
+      register: reboot_result
+      ignore_errors: true
+
+    - name: reboot machine using a custom reboot command
+      reboot:
+         reboot_timeout: 120
+         #msg: "{{ inventory_hostname }} is shutting down"
+         #boot_time_command: uptime | hostname
+         #test_command: uptime | cut -d ' ' -f 5
+      when: (reboot_result.rc == 1 )
+      register: reboot_status
+
+  post_tasks:
+  
+    - name: Send basic email
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ username }}"
+        password: "{{ password }}"
+        subject: Reboot report
+        body: Hello! {{ reboot_status }} for {{ inventory_hostname }}
+        to: 
+          - "{{ username }}"
+      delegate_to: localhost
