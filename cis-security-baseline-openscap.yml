@@ -1,0 +1,29 @@
+---
+- name: Apply CIS security baseline on a Linux server using Ansible and OpenSCAP
+  hosts: localhost
+  tasks:
+    - name: Ensure that the system is up to date
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install the openscap and openscap-utils packages
+      yum:
+        name:
+          - openscap
+          - openscap-utils
+        state: present
+
+    - name: Download the CIS security baseline profile
+      get_url:
+        url: https://www.cisecurity.org/benchmark/rhel7/
+        dest: /etc/ansible/roles/cis-security-baseline/files/cis-rhel7-level1-server.xml
+
+    - name: Generate a report of the system's current compliance with the CIS security baseline
+      shell: oscap xccdf eval --profile cis-rhel7-level1-server --results-arf /tmp/cis-rhel7-level1-server-arf.xml /etc/ansible/roles/cis-security-baseline/files/cis-rhel7-level1-server.xml
+
+    - name: Apply the CIS security baseline using the openscap-scanner tool
+      shell: openscap-scanner --profile cis-rhel7-level1-server --report /tmp/cis-rhel7-level1-server-report.html /etc/ansible/roles/cis-security-baseline/files/cis-rhel7-level1-server.xml
+
+    - name: Generate a report of the system's compliance with the CIS security baseline after it has been applied
+      shell: oscap xccdf eval --profile cis-rhel7-level1-server --results-arf /tmp/cis-rhel7-level1-server-post-arf.xml /etc/ansible/roles/cis-security-baseline/files/cis-rhel7-level1-server.xml
