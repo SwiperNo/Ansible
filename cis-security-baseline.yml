@@ -1,0 +1,43 @@
+---
+- name: Apply CIS security baseline on a Linux server using Ansible
+  hosts: localhost
+  tasks:
+    - name: Ensure that the system is up to date
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Ensure that the system is configured to use a strong password hashing algorithm
+      lineinfile:
+        path: /etc/pam.d/common-password
+        regexp: "^password.*pam_unix.so"
+        line: "password    sufficient    pam_unix.so sha512 shadow"
+
+    - name: Ensure that the system is configured to store only encrypted versions of the password
+      lineinfile:
+        path: /etc/pam.d/common-password
+        regexp: "^password.*pam_unix.so"
+        line: "password    required    pam_unix.so sha512 shadow"
+
+    - name: Ensure that the system is configured to disable remote root login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+
+    - name: Ensure that the system is configured to disable ssh access for empty passwords
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^PermitEmptyPasswords"
+        line: "PermitEmptyPasswords no"
+
+    - name: Ensure that the system is configured to disable ssh access for root
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        line: "PermitRootLogin no"
+
+    - name: Restart the ssh service
+      service:
+        name: ssh
+        state: restarted
