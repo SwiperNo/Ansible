@@ -1,0 +1,84 @@
+username: kylejones199108@gmail.com
+password: apklxlnnrmwkrzvp
+
+
+  post_tasks:
+ 
+   - name: Send basic email
+     community.general.mail:
+       host: smtp.gmail.com
+       port: 587
+       username: "{{ username }}"
+       password: "{{ password }}"
+       to:
+         - "{{ username }}"
+       subject: Server Update Report
+       body: "{{ reboot_body.stdout }}"
+     run_once: true
+     delegate_to: localhost
+
+
+GOBIN=$(pwd)/ GO111MODULE=on go install sigs.k8s.io/kustomize/kustomize/v4@latest
+
+
+
+- name: Capitalize and remove FQDN from host name
+  hosts: host_group
+  gather_facts: false
+  vars:
+    capitalized_hostname: "{{ inventory_hostname | upper | regex_replace('^(.*?)\\.ssfcuad\\.ssfcu\\.org', '\\1') }}"
+  tasks:
+    - name: Debug capitalized host name
+      debug:
+        var: capitalized_hostname
+		
+		- name: Create HTML email with server information
+  hosts: all
+  gather_facts: true
+  vars:
+    custom_facts:
+      - { name: "Department", value: "IT" }
+      - { name: "Location", value: "New York" }
+  tasks:
+    - name: Gather server uptime
+      shell: uptime
+      register: uptime_output
+
+    - name: Gather failed updates
+      shell: yum list updates --quiet --security --exclude=kernel* --exclude=python* | grep -e '^[^\ ]' | awk '{print $1}'
+      register: failed_updates
+
+    - name: Create email body
+      set_fact:
+        email_body: |
+          <html>
+          <body>
+            <table border="1" cellpadding="10">
+              <tr>
+                <td>Server Uptime</td>
+                <td>{{ uptime_output.stdout }}</td>
+              </tr>
+              {% for fact in custom_facts %}
+              <tr>
+                <td>{{ fact.name }}</td>
+                <td>{{ fact.value }}</td>
+              </tr>
+              {% endfor %}
+              <tr>
+                <td>Failed Updates</td>
+                <td>{{ failed_updates.stdout }}</td>
+              </tr>
+            </table>
+          </body>
+          </html>
+
+    - name: Send email
+      mail:
+        host: "smtp.example.com"
+        port: 587
+        username: "email@example.com"
+        password: "password"
+        to: "recipient@example.com"
+        subject: "Server information for {{ inventory_hostname }}"
+        body: "{{ email_body }}"
+        content_type: html
